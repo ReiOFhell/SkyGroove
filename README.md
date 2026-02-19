@@ -38,3 +38,12 @@ Se aparecer erro como `CorruptedCacheException ... caches/journal-1/file-access.
    - `./gradlew test`
 
 > Observação: o projeto desabilita file system watching (`org.gradle.vfs.watch=false`) para reduzir reincidência em ambientes Windows com journal corrompido.
+
+
+## Build resiliente (evita cache global corrompido)
+Se o Windows continuar falhando com `Corrupted IndexBlock/DataBlock ... file-access.bin` e erro secundário de assinatura (`Configuration.fileCollection(...)`), execute o build com **cache isolado do projeto**:
+
+- PowerShell: `./scripts/gradle-safe.ps1 test`
+- Bash: `./scripts/gradle-safe.sh test`
+
+Esses scripts forçam `GRADLE_USER_HOME=.gradle-user-home` dentro do repositório, evitando o cache global de `C:\Users\<usuario>\.gradle`.
