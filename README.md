@@ -23,3 +23,18 @@ Escolha: **Clean-ish + MVVM** em módulo único para MVP robusto e fácil de evo
 - Adicionar Paging para bibliotecas grandes.
 - Completar edição visual dos Grimórios.
 - Ranking mensal e badges imperiais.
+
+
+## Troubleshooting (Gradle cache corrompido no Windows)
+Se aparecer erro como `CorruptedCacheException ... caches/journal-1/file-access.bin`:
+
+1. Feche Android Studio e terminais do Gradle.
+2. Rode o script de reparo:
+   - PowerShell: `./scripts/repair-gradle-cache.ps1`
+   - Bash: `./scripts/repair-gradle-cache.sh`
+3. Rebaixe metadados/dependências:
+   - `./gradlew --refresh-dependencies help`
+4. Tente novamente:
+   - `./gradlew test`
+
+> Observação: o projeto desabilita file system watching (`org.gradle.vfs.watch=false`) para reduzir reincidência em ambientes Windows com journal corrompido.
