@@ -1,5 +1,6 @@
 package com.skygroove.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,6 +35,22 @@ fun OnboardingScreen(onGrant: () -> Unit) {
 }
 
 @Composable
+fun MiniPlayerBar(state: MainState, onOpenPlayer: () -> Unit, onTogglePlayPause: () -> Unit) {
+    val current = state.currentTrack ?: return
+    ElevatedCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable { onOpenPlayer() }) {
+        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(current.title, maxLines = 1)
+                Text(current.artist, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+            }
+            IconButton(onClick = onTogglePlayPause) {
+                Text(if (state.playback.isPlaying) "⏸" else "▶")
+            }
+        }
+    }
+}
+
+@Composable
 fun HomeScreen(state: MainState, modifier: Modifier = Modifier, onPlay: (Track) -> Unit) {
     LazyColumn(modifier.fillMaxSize().padding(12.dp)) {
         item { Text("Trono", style = MaterialTheme.typography.headlineMedium) }
@@ -54,11 +71,11 @@ fun LibraryScreen(state: MainState, modifier: Modifier = Modifier, onQuery: (Str
     Column(modifier.fillMaxSize().padding(12.dp)) {
         OutlinedTextField(value = state.query, onValueChange = onQuery, label = { Text("Buscar (música/artista/álbum)") }, modifier = Modifier.fillMaxWidth())
         LazyColumn {
-            items(tracksProvider()) { track ->
+            items(tracksProvider(), key = { it.id }) { track ->
                 ListItem(
                     headlineContent = { Text(track.title) },
                     supportingContent = { Text("${track.artist} • ${track.album}") },
-                    trailingContent = { Row { TextButton(onClick = { onFavorite(track.id) }) { Text(if (state.favorites.contains(track.id)) "★" else "☆") }; TextButton(onClick = { onPlay(track) }) { Text("Invocar") } } }
+                    trailingContent = { Row { TextButton(onClick = { onFavorite(track.id) }) { Text(if (state.favorites.contains(track.id)) "★" else "☆") }; TextButton(onClick = { onPlay(track) }) { Text("Tocar") } } }
                 )
                 Divider()
             }
@@ -67,17 +84,25 @@ fun LibraryScreen(state: MainState, modifier: Modifier = Modifier, onQuery: (Str
 }
 
 @Composable
-fun PlayerScreen(state: MainState, modifier: Modifier = Modifier, onFavorite: (Long) -> Unit) {
+fun PlayerScreen(state: MainState, modifier: Modifier = Modifier, onFavorite: (Long) -> Unit, onTogglePlayPause: () -> Unit, onSeek: (Long) -> Unit) {
     Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
         Text("Player Supremo", style = MaterialTheme.typography.headlineMedium)
         state.currentTrack?.let {
+            val duration = state.playback.durationMs.coerceAtLeast(1)
+            val progress = (state.playback.positionMs.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
             Text(it.title, style = MaterialTheme.typography.titleLarge)
             Text(it.artist)
             Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(progress = { 0.35f }, modifier = Modifier.fillMaxWidth())
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(8.dp))
+            Row {
+                Button(onClick = onTogglePlayPause) { Text(if (state.playback.isPlaying) "Pausar" else "Tocar") }
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(onClick = { onSeek(state.playback.positionMs + 15_000) }) { Text("+15s") }
+            }
             Spacer(Modifier.height(8.dp))
             Row { Button(onClick = { onFavorite(it.id) }) { Text("Favoritar") }; Spacer(Modifier.width(8.dp)); OutlinedButton(onClick = {}) { Text("Adicionar ao Grimório") } }
-            Text("Shuffle/Repeat/Seek e controles de mídia são providos pelo Media3 Session/Notification.")
+            Text("Fila ativa: ${state.playback.queue.size} • Índice: ${state.playback.queueIndex}")
         } ?: Text("Nenhuma relíquia invocada.")
     }
 }

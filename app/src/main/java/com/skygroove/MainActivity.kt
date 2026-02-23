@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,9 +39,12 @@ class MainActivity : ComponentActivity() {
                     }
                     else -> Scaffold(
                         bottomBar = {
-                            NavigationBar {
-                                listOf("Trono","Biblioteca","Player Supremo","Grimórios","Perfil","Estatísticas").forEachIndexed { i, label ->
-                                    NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = {}, label = { Text(label) })
+                            Column {
+                                MiniPlayerBar(state = state, onOpenPlayer = { tab = 2 }, onTogglePlayPause = vm::togglePlayPause)
+                                NavigationBar {
+                                    listOf("Trono","Biblioteca","Player Supremo","Grimórios","Perfil","Estatísticas").forEachIndexed { i, label ->
+                                        NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = {}, label = { Text(label) })
+                                    }
                                 }
                             }
                         }
@@ -48,7 +52,7 @@ class MainActivity : ComponentActivity() {
                         when (tab) {
                             0 -> HomeScreen(state, Modifier.padding(padding), onPlay = vm::play)
                             1 -> LibraryScreen(state, Modifier.padding(padding), vm::setQuery, vm::filteredTracks, vm::play, vm::toggleFavorite)
-                            2 -> PlayerScreen(state, Modifier.padding(padding), vm::toggleFavorite)
+                            2 -> PlayerScreen(state, Modifier.padding(padding), vm::toggleFavorite, vm::togglePlayPause, vm::seekTo)
                             3 -> PlaylistsScreen(state, Modifier.padding(padding), vm::createPlaylist)
                             4 -> ProfileScreen(state, Modifier.padding(padding))
                             else -> StatsScreen(state, Modifier.padding(padding))
