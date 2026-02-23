@@ -47,3 +47,7 @@ Se o Windows continuar falhando com `Corrupted IndexBlock/DataBlock ... file-acc
 - Bash: `./scripts/gradle-safe.sh test`
 
 Esses scripts forçam `GRADLE_USER_HOME=.gradle-user-home` dentro do repositório, evitando o cache global de `C:\Users\<usuario>\.gradle`.
+
+
+## Guia de reconstrução recomendado
+- Consulte `docs/GUIA_RECONSTRUCAO_SKYGROOVE.md` para um plano passo a passo focado em UX, player, ordenação e performance.
